@@ -4,7 +4,7 @@ module.exports = {
         {
             name: "ingrid-brain",
             cwd: "./web-app",
-            script: "npm",
+            script: "node_modules/.bin/next",
             args: "start",
             instances: 1,
             autorestart: true,
@@ -13,6 +13,7 @@ module.exports = {
             env: {
                 NODE_ENV: "production",
                 PORT: 3000,
+                HOSTNAME: "0.0.0.0",
             },
         },
 
