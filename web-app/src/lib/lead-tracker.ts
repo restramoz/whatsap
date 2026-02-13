@@ -2,7 +2,7 @@
 // Lead Tracking System — Extract, save, and manage lead data from conversations
 
 import { getSupabaseClient } from './supabase';
-import { llmWithFallback } from './ai-models';
+import { getLlmWithFallback } from './ai-models';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { logger } from './utils';
@@ -38,7 +38,9 @@ Ekstrak data berikut (JSON only, no markdown):
 }}
 `);
 
-const extractChain = EXTRACT_PROMPT.pipe(llmWithFallback).pipe(new StringOutputParser());
+function getExtractChain() {
+    return EXTRACT_PROMPT.pipe(getLlmWithFallback()).pipe(new StringOutputParser());
+}
 
 // ─────────────────────────────────────────────
 // SENTIMENT ANALYSIS
@@ -51,11 +53,13 @@ Pesan: {text}
 
 Sentimen:`);
 
-const sentimentChain = SENTIMENT_PROMPT.pipe(llmWithFallback).pipe(new StringOutputParser());
+function getSentimentChain() {
+    return SENTIMENT_PROMPT.pipe(getLlmWithFallback()).pipe(new StringOutputParser());
+}
 
 export async function analyzeSentiment(text: string): Promise<string> {
     try {
-        const result = await sentimentChain.invoke({ text });
+        const result = await getSentimentChain().invoke({ text });
         const sentiment = result.trim().toLowerCase();
         if (['positive', 'neutral', 'negative'].includes(sentiment)) return sentiment;
         return 'neutral';
@@ -70,7 +74,7 @@ export async function analyzeSentiment(text: string): Promise<string> {
 
 export async function extractLeadData(conversation: string): Promise<Partial<LeadProfile>> {
     try {
-        const result = await extractChain.invoke({ conversation });
+        const result = await getExtractChain().invoke({ conversation });
         // Try to parse JSON from the response
         const jsonMatch = result.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
