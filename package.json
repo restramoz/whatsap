@@ -1,0 +1,16 @@
+{
+    "name": "ingrid-ai-system",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "postinstall": "cd web-app && npm install && cd ../wa-service && npm install",
+        "build": "cd web-app && npm run build",
+        "start": "pm2-runtime start ecosystem.config.js"
+    },
+    "dependencies": {
+        "pm2": "^5.3.0"
+    },
+    "engines": {
+        "node": "20.x"
+    }
+}
