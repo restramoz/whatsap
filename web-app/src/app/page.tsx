@@ -85,7 +85,7 @@ export default function IngridDashboard() {
         setQrData(null);
         return;
       }
-      const res = await fetch("http://localhost:3001/qr");
+      const res = await fetch("/api/qr");
       const data = await res.json();
       setQrState(data.state || "unknown");
       setQrData(data.qrCode || null);
@@ -281,87 +281,87 @@ export default function IngridDashboard() {
                         <td style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{lead.last_contact ? new Date(lead.last_contact).toLocaleDateString("id-ID") : "-"}</td>
                       </tr>
                     ))}
-                </tbody>
-              </table>
+                  </tbody>
+                </table>
               </div>
             )}
-        </div>
+          </div>
         </div >
       )
-}
+      }
 
-{/* ═══ TAB: BROADCAST ═══ */ }
-{
-  tab === "broadcast" && (
-    <div className="dashboard" style={{ display: "block" }}>
-      <div className="glass-card" style={{ padding: "24px" }}>
-        <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "16px" }}>📢 Broadcast Message</h3>
-        <div className="broadcast-form">
-          <label className="form-label">Nomor Tujuan <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>(satu per baris, format: 628xxxx)</span></label>
-          <textarea className="form-textarea" rows={5} placeholder={"6281234567890\n6289876543210"} value={broadcastContacts} onChange={e => setBroadcastContacts(e.target.value)} />
-          <label className="form-label" style={{ marginTop: "12px" }}>Pesan</label>
-          <textarea className="form-textarea" rows={4} placeholder="Tulis pesan broadcast..." value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} />
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "16px" }}>
-            <button className="btn-send" onClick={handleBroadcast} disabled={!broadcastMsg.trim() || !broadcastContacts.trim()}>📢 Kirim Broadcast</button>
-            {broadcastStatus && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>{broadcastStatus}</span>}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-{/* ═══ TAB: ANALYTICS ═══ */ }
-{
-  tab === "analytics" && (
-    <div className="dashboard">
-      <div className="status-grid">
-        <div className="glass-card status-card">
-          <span className="label">Total Leads</span>
-          <div className="value" style={{ fontSize: "1.5rem", background: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{leads.length || "—"}</div>
-        </div>
-        <div className="glass-card status-card">
-          <span className="label">Messages Processed</span>
-          <div className="value" style={{ fontSize: "1.5rem", background: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{health?.components?.whatsapp?.messagesProcessed ?? "—"}</div>
-        </div>
-        <div className="glass-card status-card">
-          <span className="label">WA Service Uptime</span>
-          <div className="value" style={{ fontSize: "1.1rem", color: "var(--accent-green)" }}>{health?.components?.whatsapp?.status === "connected" ? "🟢 Active" : "🔴 Offline"}</div>
-        </div>
-      </div>
-
-      {/* API Keys */}
-      <div className="glass-card keys-panel" style={{ gridColumn: "1 / -1" }}>
-        <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: "12px" }}>🔑 API Keys</h3>
-        <div className="keys-list">
-          {["groq", "gemini", "openrouter"].map(k => (
-            <div className="key-row" key={k}>
-              <span className="key-name">{k.toUpperCase()}_API_KEY</span>
-              <Badge status={healthLoading ? "checking" : (health?.components?.apiKeys as any)?.[k] || "missing"} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Lead Funnel */}
-      <div className="glass-card" style={{ gridColumn: "1 / -1", padding: "24px" }}>
-        <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: "16px" }}>📊 Lead Funnel</h3>
-        <div className="funnel-grid">
-          {(["new", "warm", "hot", "closed", "cold"] as const).map(s => {
-            const count = leads.filter(l => l.status === s).length;
-            const colors: Record<string, string> = { new: "var(--accent-cyan)", warm: "var(--accent-amber)", hot: "var(--accent-red)", closed: "var(--accent-green)", cold: "var(--text-muted)" };
-            return (
-              <div key={s} className="funnel-item">
-                <div className="funnel-count" style={{ color: colors[s] }}>{count}</div>
-                <div className="funnel-label">{s.toUpperCase()}</div>
+      {/* ═══ TAB: BROADCAST ═══ */}
+      {
+        tab === "broadcast" && (
+          <div className="dashboard" style={{ display: "block" }}>
+            <div className="glass-card" style={{ padding: "24px" }}>
+              <h3 style={{ fontSize: "1rem", fontWeight: 600, marginBottom: "16px" }}>📢 Broadcast Message</h3>
+              <div className="broadcast-form">
+                <label className="form-label">Nomor Tujuan <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>(satu per baris, format: 628xxxx)</span></label>
+                <textarea className="form-textarea" rows={5} placeholder={"6281234567890\n6289876543210"} value={broadcastContacts} onChange={e => setBroadcastContacts(e.target.value)} />
+                <label className="form-label" style={{ marginTop: "12px" }}>Pesan</label>
+                <textarea className="form-textarea" rows={4} placeholder="Tulis pesan broadcast..." value={broadcastMsg} onChange={e => setBroadcastMsg(e.target.value)} />
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginTop: "16px" }}>
+                  <button className="btn-send" onClick={handleBroadcast} disabled={!broadcastMsg.trim() || !broadcastContacts.trim()}>📢 Kirim Broadcast</button>
+                  {broadcastStatus && <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)" }}>{broadcastStatus}</span>}
+                </div>
               </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  )
-}
+            </div>
+          </div>
+        )
+      }
+
+      {/* ═══ TAB: ANALYTICS ═══ */}
+      {
+        tab === "analytics" && (
+          <div className="dashboard">
+            <div className="status-grid">
+              <div className="glass-card status-card">
+                <span className="label">Total Leads</span>
+                <div className="value" style={{ fontSize: "1.5rem", background: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{leads.length || "—"}</div>
+              </div>
+              <div className="glass-card status-card">
+                <span className="label">Messages Processed</span>
+                <div className="value" style={{ fontSize: "1.5rem", background: "var(--gradient-brand)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{health?.components?.whatsapp?.messagesProcessed ?? "—"}</div>
+              </div>
+              <div className="glass-card status-card">
+                <span className="label">WA Service Uptime</span>
+                <div className="value" style={{ fontSize: "1.1rem", color: "var(--accent-green)" }}>{health?.components?.whatsapp?.status === "connected" ? "🟢 Active" : "🔴 Offline"}</div>
+              </div>
+            </div>
+
+            {/* API Keys */}
+            <div className="glass-card keys-panel" style={{ gridColumn: "1 / -1" }}>
+              <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: "12px" }}>🔑 API Keys</h3>
+              <div className="keys-list">
+                {["groq", "gemini", "openrouter"].map(k => (
+                  <div className="key-row" key={k}>
+                    <span className="key-name">{k.toUpperCase()}_API_KEY</span>
+                    <Badge status={healthLoading ? "checking" : (health?.components?.apiKeys as any)?.[k] || "missing"} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Lead Funnel */}
+            <div className="glass-card" style={{ gridColumn: "1 / -1", padding: "24px" }}>
+              <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: "16px" }}>📊 Lead Funnel</h3>
+              <div className="funnel-grid">
+                {(["new", "warm", "hot", "closed", "cold"] as const).map(s => {
+                  const count = leads.filter(l => l.status === s).length;
+                  const colors: Record<string, string> = { new: "var(--accent-cyan)", warm: "var(--accent-amber)", hot: "var(--accent-red)", closed: "var(--accent-green)", cold: "var(--text-muted)" };
+                  return (
+                    <div key={s} className="funnel-item">
+                      <div className="funnel-count" style={{ color: colors[s] }}>{count}</div>
+                      <div className="funnel-label">{s.toUpperCase()}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )
+      }
     </>
   );
 }

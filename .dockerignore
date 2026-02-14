@@ -1,0 +1,43 @@
+# Dependencies (will be installed fresh in Docker)
+node_modules/
+web-app/node_modules/
+wa-service/node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# WhatsApp session data
+.wwebjs_auth/
+.wwebjs_cache/
+wa-service/.wwebjs_auth/
+wa-service/.wwebjs_cache/
+
+# Environment files (use HF Secrets instead)
+.env
+.env.local
+.env.production
+web-app/.env
+wa-service/.env
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Misc
+.agent/
+.gemini/
+README.md

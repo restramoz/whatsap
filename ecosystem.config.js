@@ -1,18 +1,20 @@
+const isDocker = process.env.DOCKER === 'true' || process.env.HF_SPACE_ID;
+
 module.exports = {
     apps: [
         // ── INGRID BRAIN (Next.js) ──
         {
             name: "ingrid-brain",
-            cwd: "./web-app",
-            script: "node_modules/.bin/next",
-            args: "start",
+            cwd: isDocker ? "./web-app-standalone/web-app" : "./web-app",
+            script: isDocker ? "server.js" : "node_modules/.bin/next",
+            args: isDocker ? "" : "start",
             instances: 1,
             autorestart: true,
             watch: false,
             max_memory_restart: "1G",
             env: {
                 NODE_ENV: "production",
-                PORT: 3000,
+                PORT: process.env.PORT || 7860,
                 HOSTNAME: "0.0.0.0",
             },
         },
@@ -28,6 +30,7 @@ module.exports = {
             max_memory_restart: "512M",
             env: {
                 NODE_ENV: "production",
+                PORT: 3001,
             },
         },
     ],

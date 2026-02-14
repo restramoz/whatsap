@@ -1,33 +1,38 @@
 # Dependencies
 node_modules/
+web-app/node_modules/
+wa-service/node_modules/
 
-# Environment variables (SECRETS!)
+# Next.js
+.next/
+out/
+build/
+
+# WhatsApp Session (Sensitive)
+.wwebjs_auth/
+.wwebjs_cache/
+wa-service/.wwebjs_auth/
+wa-service/.wwebjs_cache/
+
+# Environment Variables
 .env
 .env.local
 .env.production
-
-# Next.js build
-.next/
-out/
-
-# WhatsApp session data
-.wwebjs_auth/
-.wwebjs_cache/
-
-# OS files
-Thumbs.db
-.DS_Store
-
-# IDE
-.vscode/
-.idea/
+.env.development
+*.env
+!.env.example
 
 # Logs
-*.log
 npm-debug.log*
-
-# PM2 logs
+yarn-debug.log*
+yarn-error.log*
 logs/
+*.log
 
-# Lock files (optional — hapus baris ini jika mau commit lock file)
-# package-lock.json
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

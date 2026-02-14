@@ -8,19 +8,35 @@ import { Document } from '@langchain/core/documents';
 import { getSupabaseClient } from './supabase';
 import { cleanTextForEmbedding, logger } from './utils';
 
-// --- Embedding Model ---
-// gemini-embedding-001 (default 3072d, MRL scalable)
-const embeddings = new GoogleGenerativeAIEmbeddings({
-    apiKey: process.env.GEMINI_API_KEY,
-    model: 'gemini-embedding-001',
-});
+// --- Embedding Model (Lazy Init) ---
+let embeddingsInstance: GoogleGenerativeAIEmbeddings | null = null;
 
-// --- Vector Store ---
-const vectorStore = new SupabaseVectorStore(embeddings, {
-    client: getSupabaseClient(),
-    tableName: 'chat_history',
-    queryName: 'match_documents',
-});
+function getEmbeddings() {
+    if (!embeddingsInstance) {
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) throw new Error("GEMINI_API_KEY not set");
+
+        embeddingsInstance = new GoogleGenerativeAIEmbeddings({
+            apiKey,
+            model: 'gemini-embedding-001',
+        });
+    }
+    return embeddingsInstance;
+}
+
+// --- Vector Store (Lazy Init) ---
+let vectorStoreInstance: SupabaseVectorStore | null = null;
+
+function getVectorStore() {
+    if (!vectorStoreInstance) {
+        vectorStoreInstance = new SupabaseVectorStore(getEmbeddings(), {
+            client: getSupabaseClient(),
+            tableName: 'chat_history',
+            queryName: 'match_documents',
+        });
+    }
+    return vectorStoreInstance;
+}
 
 /**
  * Deep-clean text for embedding: strip emojis, special chars, normalize whitespace.
@@ -47,7 +63,7 @@ export async function searchMemory(query: string, phoneNumber: string): Promise<
         const safeQuery = sanitizeForVector(cleanTextForEmbedding(query));
         if (safeQuery.length < 3) return '';
 
-        const results = await vectorStore.similaritySearch(safeQuery, 3, {
+        const results = await getVectorStore().similaritySearch(safeQuery, 3, {
             phoneNumber,
         });
 
@@ -84,7 +100,7 @@ export async function saveMemory(phoneNumber: string, userMsg: string, aiMsg: st
             return;
         }
 
-        await vectorStore.addDocuments([
+        await getVectorStore().addDocuments([
             new Document({
                 pageContent: combinedContent,
                 metadata: { phoneNumber },
@@ -96,6 +112,4 @@ export async function saveMemory(phoneNumber: string, userMsg: string, aiMsg: st
         logger.error('Memori', 'Penyimpanan gagal.', error);
     }
 }
-
-export { embeddings, vectorStore };
 
