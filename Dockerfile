@@ -1,40 +1,49 @@
-# ═══════════════════════════════════════════════════════════
-# Ingrid AI System — Dockerfile for Hugging Face Spaces
-# Two services: Next.js (web-app) + WhatsApp Gateway (wa-service)
-# Managed by PM2
-# ═══════════════════════════════════════════════════════════
-
 # ── Stage 1: Builder ──────────────────────────────────────
 FROM node:20-slim AS builder
-
 WORKDIR /app
 
-# Copy root package files
 COPY package.json package-lock.json* ./
-
-# Copy sub-project package files
 COPY web-app/package.json web-app/package-lock.json* ./web-app/
 COPY wa-service/package.json wa-service/package-lock.json* ./wa-service/
 
-# Install ALL dependencies (including devDeps for building)
+# Dummy ENV
+ENV GOOGLE_API_KEY="dummy"
+ENV GEMINI_API_KEY="dummy"
+
+# Install dependencies
 RUN cd web-app && npm install --legacy-peer-deps && cd ../wa-service && npm install
 
-# Copy source code
 COPY web-app/ ./web-app/
 COPY wa-service/ ./wa-service/
 COPY ecosystem.config.js ./
 
-# Build Next.js (standalone output)
+# Build Next.js
 RUN cd web-app && npm run build
 
-# ── Stage 2: Production Runner ────────────────────────────
+# ── Stage 2: Production Runner (CLEAN & FAST) ─────────────
 FROM node:20-slim AS runner
 
-# Install Chromium dependencies for whatsapp-web.js (Puppeteer)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    chromium \
-    ca-certificates \
-    fonts-liberation \
+# Tuh kan, gak perlu apt-get install chromium lagi! 🎉
+WORKDIR /app
+
+RUN npm install -g pm2
+
+# Copy files
+COPY ecosystem.config.js ./
+COPY --from=builder /app/web-app/.next/standalone ./web-app-standalone/
+COPY --from=builder /app/web-app/.next/static ./web-app-standalone/web-app/.next/static
+COPY --from=builder /app/web-app/public ./web-app-standalone/web-app/public
+COPY --from=builder /app/wa-service ./wa-service/
+
+# Permissions
+RUN chown -R node:node /app
+USER node
+
+ENV PORT=7860
+ENV NODE_ENV=production
+EXPOSE 7860
+
+CMD ["pm2-runtime", "start", "ecosystem.config.js"]    fonts-liberation \
     libappindicator3-1 \
     libasound2 \
     libatk-bridge2.0-0 \
